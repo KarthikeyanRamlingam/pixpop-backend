@@ -7,14 +7,10 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # ✅ Use your real Hugging Face Space URL
-HF_API_URL = "https://huggingface.co/spaces/karthikn11/pixpop.hf.space/run/predict"
+HF_API_URL = "https://huggingface.co/spaces/karthikn11/pixpop.hf.space/api/predict"
 
 # ✅ Load Hugging Face token (set in Railway secrets)
 HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
-
-@app.route("/")
-def home():
-    return "✅ Pixpop Railway backend is live (proxy to Hugging Face Space)."
 
 @app.route("/generate", methods=["POST"])
 def generate():
@@ -35,6 +31,10 @@ def generate():
             timeout=120
         )
 
+        # ✅ log HF response for debugging
+        print("HF status:", response.status_code)
+        print("HF response:", response.text)
+
         if response.status_code == 200:
             return jsonify({"status": "ok", "result": response.json()})
         else:
@@ -46,3 +46,4 @@ def generate():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))  # Railway assigns $PORT
     app.run(host="0.0.0.0", port=port)
+
