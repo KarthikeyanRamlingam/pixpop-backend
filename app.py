@@ -1,19 +1,20 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os, requests
+import requests
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Hugging Face Space API endpoint
-HF_API_URL = "https://huggingface.co/spaces/karthikn11/pixpop.hf.space/run/predict"
+# Hugging Face Space URL (replace if needed)
+HF_SPACE_API = "https://karthikn11-pixpop-sdxl-lcm.hf.space/run/predict"
 
-# Hugging Face token stored in Railway Variables
-HF_TOKEN = os.getenv("HF_TOKEN")
+# HF token stored in Railway Environment Variables
+HF_TOKEN = os.environ.get("HF_TOKEN")
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
-    return "✅ Pixpop Railway backend is live"
+    return "✅ Pixpop Railway backend is live (proxy to Hugging Face Space)."
 
 @app.route("/generate", methods=["POST"])
 def generate():
@@ -25,9 +26,9 @@ def generate():
 
         headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
-        # Send request to Hugging Face Space
+        # POST request to HF Space
         response = requests.post(
-            HF_API_URL,
+            HF_SPACE_API,
             headers=headers,
             json={"data": [prompt, steps, guidance]},
             timeout=120
