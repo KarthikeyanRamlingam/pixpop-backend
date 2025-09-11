@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-HF_API_URL = "https://<your-hf-space>.hf.space/run/predict"
+HF_API_URL = "https://huggingface.co/spaces/karthikn11/pixpop.hf.space/run/predict"
 
 @app.route("/")
 def home():
@@ -37,3 +37,4 @@ def generate():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))  # Railway gives $PORT
     app.run(host="0.0.0.0", port=port)
+
