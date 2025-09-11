@@ -12,7 +12,10 @@ HF_API_URL = "https://huggingface.co/spaces/karthikn11/pixpop.hf.space/api/predi
 # ✅ Load Hugging Face token (set in Railway secrets)
 HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
 
-@app.route("/generate", methods=["POST"])
+@app.route("/", methods=["GET"])
+def home():
+    return "✅ Pixpop Railway backend is live (proxy to Hugging Face Space)."
+
 def generate():
     try:
         data = request.json
@@ -46,4 +49,5 @@ def generate():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))  # Railway assigns $PORT
     app.run(host="0.0.0.0", port=port)
+
 
