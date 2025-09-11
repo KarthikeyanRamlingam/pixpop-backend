@@ -1,14 +1,16 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
+import os
 
 app = Flask(__name__)
+CORS(app)
 
-# 🔹 Replace with your Hugging Face Space URL
-HF_API_URL = "https://<your-username>-pixpop-sdxl-lcm.hf.space/run/predict"
+HF_API_URL = "https://<your-hf-space>.hf.space/run/predict"
 
 @app.route("/")
 def home():
-    return "✅ Pixpop Render backend is live (proxy to Hugging Face Space)."
+    return "✅ Pixpop Railway backend is live (proxy to Hugging Face Space)."
 
 @app.route("/generate", methods=["POST"])
 def generate():
@@ -18,23 +20,20 @@ def generate():
         steps = int(data.get("steps", 8))
         guidance = float(data.get("guidance", 1.0))
 
-        # 🔹 Forward request to Hugging Face Space API
         response = requests.post(
             HF_API_URL,
-            json={"data": [prompt, steps, guidance]},  # order must match Gradio function
+            json={"data": [prompt, steps, guidance]},
             timeout=120
         )
 
         if response.status_code == 200:
-            result = response.json()
-            # Usually result["data"][0] is the image (base64 or URL)
-            return jsonify({"status": "ok", "result": result})
+            return jsonify({"status": "ok", "result": response.json()})
         else:
             return jsonify({"status": "error", "details": response.text}), 500
 
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
 
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 8080))  # Railway gives $PORT
+    app.run(host="0.0.0.0", port=port)
