@@ -6,7 +6,11 @@ import os
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-HF_API_URL = "https://huggingface.co/spaces/karthikn11/pixpop/run/predict"
+# ✅ Use your real Hugging Face Space URL
+HF_API_URL = "https://huggingface.co/spaces/karthikn11/pixpop.hf.space/run/predict"
+
+# ✅ Load Hugging Face token (set in Railway secrets)
+HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
 
 @app.route("/")
 def home():
@@ -20,8 +24,13 @@ def generate():
         steps = int(data.get("steps", 8))
         guidance = float(data.get("guidance", 1.0))
 
+        headers = {}
+        if HF_API_TOKEN:
+            headers["Authorization"] = f"Bearer {HF_API_TOKEN}"
+
         response = requests.post(
             HF_API_URL,
+            headers=headers,
             json={"data": [prompt, steps, guidance]},
             timeout=120
         )
@@ -35,10 +44,5 @@ def generate():
         return jsonify({"status": "error", "details": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))  # Railway gives $PORT
+    port = int(os.environ.get("PORT", 8080))  # Railway assigns $PORT
     app.run(host="0.0.0.0", port=port)
-
-
-
-
-
