@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-HF_API_URL = "https://karthikn11-pixpop.hf.space/run/predict"
+HF_API_URL = "https://karthikn11-pixpop.hf.space/api/predict/"
 HF_TOKEN = os.environ.get("HF_TOKEN")
 
 HEADERS = {
@@ -45,3 +45,4 @@ def generate():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
