@@ -4,29 +4,43 @@ import requests
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Health check route
+HF_API_URL = "https://karthikn11-pixpop.hf.space/run/predict"
+HF_TOKEN = os.environ.get("HF_TOKEN")
+
+HEADERS = {
+    "Authorization": f"Bearer {HF_TOKEN}"
+}
+
 @app.route("/")
 def home():
-    return "✅ Backend is live"
+    return "✅ Pixpop Railway backend is live."
 
-# Main generate route
 @app.route("/generate", methods=["POST"])
 def generate():
     try:
         data = request.json
         prompt = data.get("prompt", "A futuristic city at sunset, ultra realistic, 8k")
-        steps = int(data.get("steps", 8))
-        guidance = float(data.get("guidance", 1.0))
 
-        # Here you should call HF API or simulate response
-        # For now, let's just return the prompt to test
-        return jsonify({"status": "ok", "prompt_received": prompt})
+        payload = {"inputs": prompt}
+
+        response = requests.post(HF_API_URL, headers=HEADERS, json=payload, timeout=120)
+
+        if response.status_code == 200:
+            result = response.json()
+            image_base64 = result[0]['image_base64'] if isinstance(result, list) else None
+
+            return jsonify({
+                "status": "ok",
+                "prompt_received": prompt,
+                "image_base64": image_base64
+            })
+        else:
+            return jsonify({"status": "error", "details": response.text}), 500
 
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
