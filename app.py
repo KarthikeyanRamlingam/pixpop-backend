@@ -8,7 +8,8 @@ CORS(app)  # Allow requests from anywhere (Netlify frontend)
 
 # Use your Hugging Face token here (set in Railway Secrets)
 HF_TOKEN = os.environ.get("HF_TOKEN")
-HF_API_URL = "https://api-inference.huggingface.co/models/karthikn11/pixpop"
+HF_API_URL = "https://karthikn11-pixpop.hf.space/run/predict
+"
 
 headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
@@ -36,3 +37,4 @@ def generate():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
