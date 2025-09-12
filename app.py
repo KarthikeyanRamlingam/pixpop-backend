@@ -4,32 +4,32 @@ import requests
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Hugging Face Space URL (replace if needed)
-HF_SPACE_API = "https://karthikn11-pixpop-sdxl-lcm.hf.space/run/predict"
+# ✅ Hugging Face Space endpoint (your model endpoint)
+HF_API_URL = "https://karthikn11-pixpop.hf.space/run/predict"
 
-# HF token stored in Railway Environment Variables
+# ✅ Hugging Face API token (set in Railway → Variables)
 HF_TOKEN = os.environ.get("HF_TOKEN")
+
 
 @app.route("/")
 def home():
     return "✅ Pixpop Railway backend is live (proxy to Hugging Face Space)."
 
+
 @app.route("/generate", methods=["POST"])
 def generate():
     try:
-        data = request.json or {}
-        prompt = data.get("prompt", "A futuristic city at sunset")
+        data = request.json
+        prompt = data.get("prompt", "A futuristic city at sunset, ultra realistic, 8k")
         steps = int(data.get("steps", 8))
         guidance = float(data.get("guidance", 1.0))
 
-        headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-
-        # POST request to HF Space
+        # ✅ Send request to Hugging Face Space
         response = requests.post(
-            HF_SPACE_API,
-            headers=headers,
+            HF_API_URL,
+            headers={"Authorization": f"Bearer {HF_TOKEN}"},
             json={"data": [prompt, steps, guidance]},
             timeout=120
         )
@@ -42,6 +42,7 @@ def generate():
     except Exception as e:
         return jsonify({"status": "error", "details": str(e)}), 500
 
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 8080))  # Railway provides $PORT
     app.run(host="0.0.0.0", port=port)
