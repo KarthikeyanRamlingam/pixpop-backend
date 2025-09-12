@@ -4,38 +4,24 @@ import requests
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 HF_API_URL = "https://karthikn11-pixpop.hf.space/api/predict/"
-HF_TOKEN = os.environ.get("HF_TOKEN")
-
-HEADERS = {
-    "Authorization": f"Bearer {HF_TOKEN}"
-}
 
 @app.route("/")
 def home():
-    return "✅ Pixpop Railway backend is live."
+    return "✅ Pixpop Railway backend is live!"
 
 @app.route("/generate", methods=["POST"])
 def generate():
     try:
         data = request.json
-        prompt = data.get("prompt", "A futuristic city at sunset, ultra realistic, 8k")
+        prompt = data.get("prompt", "A futuristic city at sunset, 8k")
+        payload = {"data": [prompt]}
 
-        payload = {"inputs": prompt}
-
-        response = requests.post(HF_API_URL, headers=HEADERS, json=payload, timeout=120)
-
+        response = requests.post(HF_API_URL, json=payload, timeout=120)
         if response.status_code == 200:
-            result = response.json()
-            image_base64 = result[0]['image_base64'] if isinstance(result, list) else None
-
-            return jsonify({
-                "status": "ok",
-                "prompt_received": prompt,
-                "image_base64": image_base64
-            })
+            return jsonify({"status": "ok", "result": response.json()})
         else:
             return jsonify({"status": "error", "details": response.text}), 500
 
@@ -45,4 +31,3 @@ def generate():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
-
