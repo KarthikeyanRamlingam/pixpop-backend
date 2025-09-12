@@ -2,3 +2,9 @@ flask
 flask-cors
 requests
 gunicorn
+gradio==3.40.0
+diffusers==1.25.1
+torch==2.2.0
+transformers
+
+
