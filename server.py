@@ -1,30 +1,28 @@
-# server.py
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import requests
-import os
+import gradio as gr
+from diffusers import StableDiffusionPipeline
 
-app = Flask(__name__)
-CORS(app)
+# Load SDXL safely on CPU
+pipe = StableDiffusionPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-xl-base-1.0"
+)
 
-# Change this to your HF API URL (for deployed HF Space or local testing)
-HF_API_URL = "http://127.0.0.1:7860/api/predict/"
+def generate_image(prompt):
+    # Generate image
+    image = pipe(prompt).images[0]
+    return image
 
-@app.route("/generate", methods=["POST"])
-def generate():
-    try:
-        data = request.json
-        prompt = data.get("prompt", "A futuristic city at sunset")
-        
-        response = requests.post(HF_API_URL, json={"data":[prompt]}, timeout=120)
-
-        if response.status_code == 200:
-            return jsonify({"status":"ok", "result": response.json()})
-        else:
-            return jsonify({"status":"error", "details": response.text}), 500
-    except Exception as e:
-        return jsonify({"status":"error", "details": str(e)}), 500
+# Create Gradio Interface
+demo = gr.Interface(
+    fn=generate_image,
+    inputs=gr.Textbox(label="Prompt"),
+    outputs=gr.Image(label="Generated Image")
+)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    # Launch server for Railway
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=int(__import__("os").environ.get("PORT", 7860)),
+        show_api=True,        # Exposes /api/predict/
+        enable_queue=True     # Handles multiple requests safely
+    )
