@@ -1,12 +1,12 @@
-# Core Hugging Face + Diffusers
+# Core image generation
 diffusers==0.21.4
 transformers>=4.30.0
 huggingface_hub>=0.16.4
 safetensors>=0.3.1
 accelerate>=0.20.3
 
-# Torch (CPU/GPU auto-detect on Spaces)
+# Torch (auto-selects GPU/CPU on Spaces)
 torch
 
-# Frontend (Gradio app)
+# UI
 gradio>=3.41.2
